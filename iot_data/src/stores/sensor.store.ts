@@ -31,8 +31,6 @@ export const useSensorStore = defineStore('sensor', () => {
     try {
       const mergedParams = { ...filterParams.value, ...params }
       const res = await sensorService.getVisualizedSensorData(mergedParams)
-      console.log('Fetched visualized data:', res.data);
-      
       visualizedData.value = res.data
     } catch (err) {
       error.value = (err as Error).message || 'Failed to fetch sensor data'
