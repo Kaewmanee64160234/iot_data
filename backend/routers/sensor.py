@@ -136,13 +136,15 @@ def get_visualized_data_all(
     if end_time:
         query = query.filter(VisualizedSensorData.timestamp <= end_time)
 
+    total = query.count()  # Get the total count of records
+
     if order == "desc":
         query = query.order_by(VisualizedSensorData.timestamp.desc())
     else:
         query = query.order_by(VisualizedSensorData.timestamp.asc())
 
     data = query.offset(skip).limit(limit).all()
-    return data
+    return {"total": total, "data": data}
 
 @router.get("/aggregated")
 def get_summary_statistics(

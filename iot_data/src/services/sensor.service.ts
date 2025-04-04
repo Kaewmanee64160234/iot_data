@@ -39,21 +39,18 @@ function getVisualizedSummary(params: {
   return http.get('/sensor/aggregated', { params: cleanedParams })
 }
 
-function getAllVisualizedData(params: {
+ function getAllVisualizedData(params: {
   start_time?: string
   end_time?: string
   skip?: number
   limit?: number
   order?: string
-}): Promise<{ data: VisualizedSensorData[] }> {
+}): Promise<{ total: number; data: VisualizedSensorData[] }> {
   const cleanedParams = Object.fromEntries(
-    Object.entries(params).filter(
-      ([_, v]) => v !== undefined && v !== null && v !== ''
-    )
+    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== '')
   )
-  return http.get('/sensor/visualized', { params: cleanedParams })
+  return http.get('/sensor/visualized', { params: cleanedParams }).then(res => res.data)
 }
-
 
 // export
 export default {

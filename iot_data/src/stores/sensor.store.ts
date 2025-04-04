@@ -8,6 +8,7 @@ import type { VisualizedSummary } from '@/types/summary.sensor.types'
 export const useSensorStore = defineStore('sensor', () => {
   const visualizedData = ref<VisualizedSensorData[]>([])
   const loading = ref(false)
+  const total = ref(0)
   const error = ref<string | null>(null)
   const summary = ref<VisualizedSummary | null>(null)
   const filterParams = ref({
@@ -105,21 +106,24 @@ function clearChartData() {
   anomalyPoints.value = []
 }
 
-async function fetchAllVisualizedData(params?: {
+async function fetchAllVisualizedData(params: {
   start_time?: string
   end_time?: string
   skip?: number
   limit?: number
-  order?: string // 'asc' | 'desc'
+  order?: string
 }) {
   loading.value = true
   error.value = null
   try {
-    const res = await sensorService.getAllVisualizedData(params || {})
+    const res = await sensorService.getAllVisualizedData(params)
     visualizedData.value = res.data
-    console.log('Fetched all visualized data:', visualizedData.value.length)
+    total.value = res.total
+    return { total: res.total }
   } catch (err) {
     error.value = (err as Error).message || 'Failed to fetch all visualized data'
+    total.value = 0
+    return { total: 0 }
   } finally {
     loading.value = false
   }
@@ -140,5 +144,6 @@ async function fetchAllVisualizedData(params?: {
     anomalies,
     anomalyPoints,
     fetchAllVisualizedData,
+    total
   }
 })
