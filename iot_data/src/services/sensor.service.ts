@@ -41,9 +41,32 @@ function getVisualizedSummary(params: {
   return http.get('/sensor/visualized/summary', { params: cleanedParams })
 }
 
+function getChartData(params: {
+  start_time?: string
+  end_time?: string
+  resolution?: 'hourly' | 'daily'
+}) {
+  return http.get('/sensor/visualized/chart-data', { params })
+}
+
+function getChartDataWithAnomalies(params: {
+  start_time?: string
+  end_time?: string
+  resolution?: 'hourly' | 'daily'
+}): Promise<{ graph: any[]; anomalies: any[] }> {
+  const cleanedParams = Object.fromEntries(
+    Object.entries(params).filter(
+      ([_, v]) => v !== undefined && v !== null && v !== ''
+    )
+  )
+  return http.get('/sensor/visualized/chart-data', { params: cleanedParams })
+}
+
 // export
 export default {
   uploadSensorCSV,
   getVisualizedSensorData,
-  getVisualizedSummary
+  getVisualizedSummary,
+  getChartData,
+  getChartDataWithAnomalies,
 }

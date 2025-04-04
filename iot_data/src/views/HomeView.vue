@@ -34,7 +34,7 @@
 
       <div class="mt-4">
         <button
-          @click="$router.push('/about')"
+          @click="$router.push('/sensor')"
           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
         >
           Upload Data

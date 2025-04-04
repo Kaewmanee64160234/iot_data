@@ -1,3 +1,4 @@
+from datetime import date
 import pandas as pd
 import numpy as np
 
@@ -11,7 +12,7 @@ def process_clean_and_anomalies(df: pd.DataFrame) -> pd.DataFrame:
     # anomaly z-score
     for col in ["temperature", "humidity", "air_quality"]:
         z = (df[col] - df[col].mean()) / df[col].std()
-        df[f"{col}_anomaly"] = abs(z) > 3  # ✅ True = ผิดปกติ
+        df[f"{col}_anomaly"] = abs(z) > 3 
 
     return df
 
@@ -69,36 +70,49 @@ def detect_anomalies_iqr(df: pd.DataFrame) -> pd.DataFrame:
         df[f"{col}_anomaly"] = ~df[col].between(q1 - 1.5 * iqr, q3 + 1.5 * iqr)
     return df
 
+def prepare_visual_summary(df: pd.DataFrame, start_date: date = None, end_date: date = None):
+    """
+    Prepare visualization-ready data with summary and graph-ready records.
+    """
+    df = df.copy()
 
-def prepare_visual_summary(df: pd.DataFrame):
-    """
-    Prepare visualization-ready data: stats, anomaly points, chart structure.
-    """
-    today = df["timestamp"].dt.date.max()
-    df_today = df[df["timestamp"].dt.date == today]
+    # ✅ ใช้ช่วงเวลาทั้งหมดถ้าไม่ระบุช่วงเวลา
+    if start_date is None or end_date is None:
+        start_date = df["timestamp"].dt.date.min()
+        end_date = df["timestamp"].dt.date.max()
+
+    # Filter date range
+    mask = (df["timestamp"].dt.date >= start_date) & (df["timestamp"].dt.date <= end_date)
+    df_range = df[mask]
+
+    # Convert timestamp to string for front-end (ISO format)
+    df_range["timestamp"] = df_range["timestamp"].astype(str)
 
     summary = {
-        "today_summary": {
+        "date_range": {
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat()
+        },
+        "summary": {
             "temperature": {
-                "min": round(df_today["temperature"].min(), 2),
-                "max": round(df_today["temperature"].max(), 2),
-                "mean": round(df_today["temperature"].mean(), 2)
+                "min": round(df_range["temperature"].min(), 2),
+                "max": round(df_range["temperature"].max(), 2),
+                "mean": round(df_range["temperature"].mean(), 2)
             },
             "humidity": {
-                "min": round(df_today["humidity"].min(), 2),
-                "max": round(df_today["humidity"].max(), 2),
-                "mean": round(df_today["humidity"].mean(), 2)
+                "min": round(df_range["humidity"].min(), 2),
+                "max": round(df_range["humidity"].max(), 2),
+                "mean": round(df_range["humidity"].mean(), 2)
             },
             "air_quality": {
-                "min": round(df_today["air_quality"].min(), 2),
-                "max": round(df_today["air_quality"].max(), 2),
-                "mean": round(df_today["air_quality"].mean(), 2)
+                "min": round(df_range["air_quality"].min(), 2),
+                "max": round(df_range["air_quality"].max(), 2),
+                "mean": round(df_range["air_quality"].mean(), 2)
             }
         },
-        "graph_data": df.to_dict(orient="records")
+        "graph_data": df_range.to_dict(orient="records")
     }
     return summary
-
 
 def process_sensor_data_pipeline(df: pd.DataFrame, resample_window: str = "1H") -> dict:
     """

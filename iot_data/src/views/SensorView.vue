@@ -31,6 +31,18 @@
           <option value="daily">Daily</option>
         </select>
       </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Latest Only</label>
+        <input type="checkbox" v-model="filters.latestOnly" class="w-6 h-6" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Skip</label>
+        <input type="number" v-model.number="filters.skip" min="0" class="w-full border px-4 py-2 rounded" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Limit</label>
+        <input type="number" v-model.number="filters.limit" min="1" max="1000" class="w-full border px-4 py-2 rounded" />
+      </div>
       <div class="col-span-3">
         <label class="block text-sm font-medium text-gray-700 mb-1">Metrics</label>
         <div class="flex gap-4">
@@ -121,7 +133,10 @@ const filters = ref({
   start: '',
   end: '',
   mode: 'hourly',
-  metrics: ['temperature', 'humidity', 'air_quality']
+  metrics: ['temperature', 'humidity', 'air_quality'],
+  latestOnly: false,
+  skip: 0,
+  limit: 100
 })
 
 const handleFileUpload = (e: Event) => {
@@ -150,7 +165,10 @@ async function fetchAndRender() {
       end_time: filters.value.end ? filters.value.end + 'T23:59:59' : undefined,
       metrics: filters.value.metrics,
       smooth: true,
-      anomaly_only: false
+      anomaly_only: false,
+      latest_only: filters.value.latestOnly,
+      skip: filters.value.skip,
+      limit: filters.value.limit
     })
 
     if (!store.visualizedData.length) {

@@ -18,6 +18,10 @@ export const useSensorStore = defineStore('sensor', () => {
     anomaly_only: false,
   })
 
+  const chartData = ref<any[]>([])
+  const anomalies = ref<any[]>([])
+  const anomalyPoints = ref<any[]>([])
+
   // 📥 Load visualized sensor data with filter
   async function fetchVisualizedData(params?: {
     start_time?: string
@@ -25,6 +29,9 @@ export const useSensorStore = defineStore('sensor', () => {
     metrics?: string[]
     smooth?: boolean
     anomaly_only?: boolean
+    latest_only?: boolean
+    skip?: number
+    limit?: number
   }) {
     loading.value = true
     error.value = null
@@ -77,12 +84,35 @@ async function fetchSummary(params?: {
   try {
     const res = await sensorService.getVisualizedSummary(params || {})
     summary.value = res.data
+    console.log('summary', res.data);
+    
   } catch (err) {
     error.value = (err as Error).message || 'Failed to fetch summary data'
   } finally {
     loading.value = false
   }
 }
+
+// getChartData
+async function getChartData(params?: {
+  start_time?: string
+  end_time?: string
+  resolution?: 'hourly' | 'daily'
+}) {
+  loading.value = true
+  error.value = null
+  try {
+    const res = await sensorService.getChartData(params || {})
+    console.log('chart data', res.data);
+    
+  } catch (err) {
+    error.value = (err as Error).message || 'Failed to fetch chart data'
+  } finally {
+    loading.value = false
+  }
+}
+
+
 
   return {
     visualizedData,
@@ -95,5 +125,9 @@ async function fetchSummary(params?: {
     setFilters,
     fetchSummary,
     summary,
+    getChartData,
+    chartData,
+    anomalies,
+    anomalyPoints,
   }
 })
