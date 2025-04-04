@@ -3,10 +3,10 @@ import pandas as pd
 import numpy as np
 
 def process_clean_and_anomalies(df: pd.DataFrame) -> pd.DataFrame:
-    # delete duplicated 
+    # drop duplicated 
     df = df.drop_duplicates()
 
-    # delete NaN value
+    # delete null value
     df = df.dropna(subset=["temperature", "humidity", "air_quality"])
 
     # anomaly z-score
@@ -18,19 +18,17 @@ def process_clean_and_anomalies(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def validate_and_ingest(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Validate schema and filter sensor data from CSV/JSON/stream source.
-    """
+
     required_columns = ["timestamp", "temperature", "humidity", "air_quality"]
     df = df[[col for col in required_columns if col in df.columns]]
 
     # Validate timestamp
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
 
-    # Drop invalid or missing values
+    # Drop  missing values
     df = df.dropna(subset=required_columns)
 
-    # Filter valid ranges
+    # Filter ค่าผิดปกติออก
     df = df[
         df["temperature"].between(-30, 60) &
         df["humidity"].between(0, 100) &
@@ -43,7 +41,6 @@ def validate_and_ingest(df: pd.DataFrame) -> pd.DataFrame:
 def clean_weather_data(df: pd.DataFrame, resample_window: str = "1H") -> pd.DataFrame:
 
     # Fill missing value
-
     df.set_index("timestamp", inplace=True)
 
     # Resample and fill missing with interpolate
@@ -69,12 +66,10 @@ def detect_anomalies_iqr(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def prepare_visual_summary(df: pd.DataFrame, start_date: date = None, end_date: date = None):
-    """
-    Prepare visualization-ready data with summary and graph-ready records.
-    """
+
     df = df.copy()
 
-    # ✅ ใช้ช่วงเวลาทั้งหมดถ้าไม่ระบุช่วงเวลา
+    # ใช้ช่วงเวลาทั้งหมดถ้าไม่ระบุช่วงเวลา
     if start_date is None or end_date is None:
         start_date = df["timestamp"].dt.date.min()
         end_date = df["timestamp"].dt.date.max()
@@ -113,10 +108,7 @@ def prepare_visual_summary(df: pd.DataFrame, start_date: date = None, end_date: 
     return summary
 
 def process_sensor_data_pipeline(df: pd.DataFrame, resample_window: str = "1H") -> dict:
-    """
-    Main function to clean, detect anomaly, and prepare for visualization.
-    Can be used for CSV upload or IoT streaming.
-    """
+
     df = validate_and_ingest(df)
     df = clean_weather_data(df, resample_window)
     df = detect_anomalies_iqr(df)

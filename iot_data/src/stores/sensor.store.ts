@@ -23,7 +23,7 @@ export const useSensorStore = defineStore('sensor', () => {
 
   const sevenDayComparison = ref<any[]>([])
 
-  async function fetchVisualizedData(params?: {
+  const fetchVisualizedData = async (params?: {
     start_time?: string
     end_time?: string
     metrics?: string[]
@@ -31,7 +31,7 @@ export const useSensorStore = defineStore('sensor', () => {
     anomaly_only?: boolean
     latest_only?: boolean
     limit?: number
-  }) {
+  }) => {
     loading.value = true
     error.value = null
     try {
@@ -45,7 +45,7 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  async function uploadCSV(file: File) {
+  const uploadCSV = async (file: File) => {
     loading.value = true
     error.value = null
     try {
@@ -58,7 +58,7 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  function resetFilters() {
+  const resetFilters = () => {
     filterParams.value = {
       start_time: '',
       end_time: '',
@@ -68,10 +68,10 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  async function fetchSummary(params?: {
+  const fetchSummary = async (params?: {
     start_time?: string
     end_time?: string
-  }) {
+  }) => {
     loading.value = true
     error.value = null
     try {
@@ -84,13 +84,13 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  async function fetchAllVisualizedData(params: {
+  const fetchAllVisualizedData = async (params: {
     start_time?: string
     end_time?: string
     skip?: number
     limit?: number
     order?: string
-  }) {
+  }) => {
     loading.value = true
     error.value = null
     try {
@@ -107,7 +107,7 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  async function fetch7DayComparison() {
+  const fetch7DayComparison = async () => {
     loading.value = true
     error.value = null
     try {
@@ -120,18 +120,17 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  async function fetchAggregatedInsight(params: {
+  const fetchAggregatedInsight = async (params: {
     window: string
     start_time?: string
     end_time?: string
-  }) {
+  }) => {
     loading.value = true
     error.value = null
     try {
       const res = await sensorService.getAggregatedInsight(params)
       aggregatedInsights.value = res
-      console.log('aggregatedInsights', aggregatedInsights.value);
-      
+      console.log('aggregatedInsights', aggregatedInsights.value)
     } catch (err) {
       error.value = (err as Error).message || 'Failed to fetch aggregated insights'
     } finally {
@@ -139,7 +138,6 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
- 
   return {
     visualizedData,
     loading,

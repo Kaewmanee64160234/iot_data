@@ -135,11 +135,11 @@ const uploadFile = async () => {
   }
 }
 
-async function applyFilters() {
+const applyFilters = async () => {
   await fetchAndRender()
 }
 
-async function fetchAndRender() {
+const fetchAndRender = async () => {
   loading.value = true
   try {
     await store.fetchVisualizedData({
@@ -175,10 +175,8 @@ async function fetchAndRender() {
   }
 }
 
-function prepareChart() {
+const prepareChart = () => {
   const data = store.visualizedData
-  const timestamps = data.map((d) => new Date(d.timestamp))
-
   chartSeries.value = []
 
   if (filters.value.metrics.includes('temperature')) {
@@ -250,7 +248,7 @@ const fetch7DayData = async () => {
 }
 
 
-function groupByDay(data: VisualizedSensorData[]) {
+const groupByDay = (data: VisualizedSensorData[]) => {
   return data.reduce((acc, item) => {
     const dateKey = new Date(item.timestamp).toISOString().split('T')[0]
     if (!acc[dateKey]) acc[dateKey] = []
@@ -259,7 +257,7 @@ function groupByDay(data: VisualizedSensorData[]) {
   }, {} as Record<string, VisualizedSensorData[]>)
 }
 
-function formatStat(value: number | undefined | null): string {
+const formatStat = (value: number | undefined | null) => {
   if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
     return 'N/A'
   }
@@ -293,7 +291,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Add styles for the loading spinner */
 .loader {
   border: 4px solid #f3f3f3;
   border-top: 4px solid #3498db;
