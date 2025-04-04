@@ -136,6 +136,6 @@ docker pull kaewmanee/sensor-frontend:latest
 docker pull kaewmanee/sensor-backend:latest
 
 # Run (แนะนำใช้ร่วมกับ MySQL หรือ Docker Compose)
-docker run -d -p 5173:5173 kaewmanee/sensor-frontend
-docker run -d -p 8000:8000 kaewmanee/sensor-backend
+docker run -d -p 5173:5173 kaewmanee/sensor-frontend:latest
+docker run -d -p 8000:8000 kaewmanee/sensor-backend:latest
 ```
