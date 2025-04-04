@@ -25,24 +25,14 @@
         <input type="date" v-model="filters.end" class="w-full border px-4 py-2 rounded" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">View Mode</label>
-        <select v-model="filters.mode" class="w-full border px-4 py-2 rounded">
-          <option value="hourly">Hourly</option>
-          <option value="daily">Daily</option>
-        </select>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Limit</label>
+        <input type="number" v-model.number="filters.limit" min="1" max="1000" class="w-full border px-4 py-2 rounded" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Latest Only</label>
         <input type="checkbox" v-model="filters.latestOnly" class="w-6 h-6" />
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Skip</label>
-        <input type="number" v-model.number="filters.skip" min="0" class="w-full border px-4 py-2 rounded" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Limit</label>
-        <input type="number" v-model.number="filters.limit" min="1" max="1000" class="w-full border px-4 py-2 rounded" />
-      </div>
+     
       <div class="col-span-3">
         <label class="block text-sm font-medium text-gray-700 mb-1">Metrics</label>
         <div class="flex gap-4">
@@ -59,7 +49,6 @@
       </div>
     </div>
 
-    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="bg-white shadow rounded-lg p-6 text-center">
         <h3 class="font-semibold text-lg text-gray-700">Temperature (°C)</h3>
@@ -81,7 +70,6 @@
       </div>
     </div>
 
-    <!-- Line Chart (Hourly/Daily) with anomaly points -->
     <div class="border p-6 rounded-lg shadow bg-white">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Sensor Data Line Chart (with Anomalies)</h2>
       <ApexChart
@@ -93,7 +81,6 @@
       />
     </div>
 
-    <!-- Past 7-Day Chart (Daily Comparison) -->
     <div class="border p-6 rounded-lg shadow bg-white">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">7-Day Comparison Chart</h2>
       <ApexChart
@@ -132,10 +119,8 @@ const dateError = ref<string | null>(null)
 const filters = ref({
   start: '',
   end: '',
-  mode: 'hourly',
   metrics: ['temperature', 'humidity', 'air_quality'],
   latestOnly: false,
-  skip: 0,
   limit: 100
 })
 
@@ -167,7 +152,6 @@ async function fetchAndRender() {
       smooth: true,
       anomaly_only: false,
       latest_only: filters.value.latestOnly,
-      skip: filters.value.skip,
       limit: filters.value.limit
     })
 

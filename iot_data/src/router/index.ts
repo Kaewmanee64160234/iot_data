@@ -15,12 +15,7 @@ const router = createRouter({
   
       component: () => import('../views/SensorView.vue'),
     },
-    {
-      path: '/sensor-dashboard',
-      name: 'sensor-dashboard',
-      component: () => import('../views/SensorDashboard.vue'),
-    },
-    
+
   ],
 })
 

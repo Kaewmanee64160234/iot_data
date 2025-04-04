@@ -29,7 +29,6 @@ export const useSensorStore = defineStore('sensor', () => {
     smooth?: boolean
     anomaly_only?: boolean
     latest_only?: boolean
-    skip?: number
     limit?: number
   }) {
     loading.value = true
