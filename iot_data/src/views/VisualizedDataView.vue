@@ -131,7 +131,6 @@ onMounted(() => {
     </div>
 
 
-    <div v-else-if="!loading && !error" class="text-gray-500 mt-4">No data available for selected filters.</div>
     <div v-if="loading" class="loader-overlay">
       <div class="loader"></div>
     </div>
@@ -142,8 +141,7 @@ onMounted(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background-color: rgba(31, 41, 55, 0.5);
-  /* bg-gray-800 with opacity */
+  background-color: rgba(31, 41, 55, 0.5); /* bg-gray-800 with opacity */
   display: flex;
   align-items: center;
   justify-content: center;
