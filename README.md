@@ -119,3 +119,20 @@ npm run dev
 หลังจากรันคำสั่ง `npm run dev` ระบบจะเปิดหน้าเว็บอัตโนมัติที่ [http://localhost:5173/](http://localhost:5173/)
 หากไม่เปิด ให้เข้าไปที่ URL นี้ด้วยตนเอง
 
+### 🔹 3. ติดตั้งแบบ **ใช้ Docker**
+
+#### ✅ ดึงและรัน Docker Images ที่สร้างไว้ล่วงหน้า
+```bash
+# ดึง Docker Image สำหรับ Frontend
+docker pull kaewmanee/sensor-frontend:latest
+
+# ดึง Docker Image สำหรับ Backend
+docker pull kaewmanee/sensor-backend:latest
+
+# รัน Frontend บนพอร์ต 5173
+docker run -d -p 5173:5173 kaewmanee/sensor-frontend
+
+# รัน Backend บนพอร์ต 8000
+docker run -d -p 8000:8000 kaewmanee/sensor-backend
+```
+

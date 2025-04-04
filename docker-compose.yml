@@ -1,27 +1,44 @@
-version: "3.9"
+version: '3.9'
 
 services:
   frontend:
     build:
       context: ./iot_data
       dockerfile: Dockerfile
+    container_name: vue-frontend
     ports:
-      - "5173:5173" # Expose frontend on port 5173
-    volumes:
-      - ./iot_data:/app
-    stdin_open: true
-    tty: true
-    command: ["npm", "run", "dev"] # Ensure the correct command is used
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE=http://localhost:8000
+    depends_on:
+      - backend
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: fastapi-backend
     ports:
-      - "8000:8000" # Expose backend on port 8000
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - frontend
+      - "8000:8000"
     environment:
-      - DATABASE_URL=mysql+pymysql://user:password@db_host/db_name # Ensure DATABASE_URL is set correctly
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=
+      - DB_NAME=iot_data
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: iot_data
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
