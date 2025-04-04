@@ -1,5 +1,5 @@
 from io import StringIO
-from typing import List, Optional
+from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -145,6 +145,43 @@ def get_visualized_data_all(
 
     data = query.offset(skip).limit(limit).all()
     return {"total": total, "data": data}
+
+@router.get("/7day-comparison")
+def get_7day_comparison(db: Session = Depends(get_db)):
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=7)
+
+    query = db.query(VisualizedSensorData).filter(
+        VisualizedSensorData.timestamp >= start_date,
+        VisualizedSensorData.timestamp <= end_date
+    ).order_by(VisualizedSensorData.timestamp.asc())
+
+    data = query.all()
+
+    # กลุ่มข้อมูลตามวัน
+    grouped: Dict[str, List[Dict]] = {}
+
+    for d in data:
+        day_key = d.timestamp.strftime("%Y-%m-%d")
+        hour = d.timestamp.hour
+
+        if day_key not in grouped:
+            grouped[day_key] = []
+
+        grouped[day_key].append({
+            "hour": hour,
+            "temperature": d.temperature
+        })
+
+    # จัดรูปแบบให้เหมาะกับ ApexCharts
+    result = []
+    for day, values in grouped.items():
+        result.append({
+            "name": day,
+            "data": sorted([{"x": v["hour"], "y": v["temperature"]} for v in values], key=lambda x: x["x"])
+        })
+
+    return result
 
 @router.get("/aggregated")
 def get_summary_statistics(

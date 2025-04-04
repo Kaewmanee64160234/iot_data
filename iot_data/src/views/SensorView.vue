@@ -8,7 +8,8 @@
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload CSV</h2>
       <div class="flex items-center gap-4">
         <input type="file" @change="handleFileUpload" accept=".csv" class="border px-4 py-2 rounded w-full" />
-        <button @click="uploadFile" :disabled="!file" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
+        <button @click="uploadFile" :disabled="!file"
+          class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
           Upload
         </button>
       </div>
@@ -26,24 +27,29 @@
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Limit</label>
-        <input type="number" v-model.number="filters.limit" min="1" max="1000" class="w-full border px-4 py-2 rounded" />
+        <input type="number" v-model.number="filters.limit" min="1" max="1000"
+          class="w-full border px-4 py-2 rounded" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Latest Only</label>
         <input type="checkbox" v-model="filters.latestOnly" class="w-6 h-6" />
       </div>
-     
+
       <div class="col-span-3">
         <label class="block text-sm font-medium text-gray-700 mb-1">Metrics</label>
         <div class="flex gap-4">
-          <label class="flex items-center gap-2"><input type="checkbox" value="temperature" v-model="filters.metrics" /> Temperature</label>
-          <label class="flex items-center gap-2"><input type="checkbox" value="humidity" v-model="filters.metrics" /> Humidity</label>
-          <label class="flex items-center gap-2"><input type="checkbox" value="air_quality" v-model="filters.metrics" /> Air Quality</label>
+          <label class="flex items-center gap-2"><input type="checkbox" value="temperature" v-model="filters.metrics" />
+            Temperature</label>
+          <label class="flex items-center gap-2"><input type="checkbox" value="humidity" v-model="filters.metrics" />
+            Humidity</label>
+          <label class="flex items-center gap-2"><input type="checkbox" value="air_quality" v-model="filters.metrics" />
+            Air Quality</label>
         </div>
       </div>
       <div class="col-span-3 text-right">
         <p v-if="dateError" class="text-red-500 text-sm mb-2">{{ dateError }}</p>
-        <button @click="applyFilters" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600" :disabled="!!dateError">
+        <button @click="applyFilters" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+          :disabled="!!dateError">
           Apply Filters
         </button>
       </div>
@@ -72,25 +78,18 @@
 
     <div class="border p-6 rounded-lg shadow bg-white">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Sensor Data Line Chart (with Anomalies)</h2>
-      <ApexChart
-        v-if="chartOptions && chartSeries.length"
-        type="line"
-        height="350"
-        :options="chartOptions"
-        :series="chartSeries"
-      />
+      <ApexChart v-if="chartOptions && chartSeries.length" type="line" height="350" :options="chartOptions"
+        :series="chartSeries" />
     </div>
 
     <div class="border p-6 rounded-lg shadow bg-white">
-      <h2 class="text-xl font-semibold text-gray-700 mb-4">7-Day Comparison Chart</h2>
-      <ApexChart
-        v-if="dailyOptions && dailySeries.length"
-        type="line"
-        height="350"
-        :options="dailyOptions"
-        :series="dailySeries"
-      />
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">📈 7-Day Temperature Comparison</h2>
+      <ApexChart v-if="dailyOptions && dailySeries.length" type="line" height="350" :options="dailyOptions"
+        :series="dailySeries" />
+      <p v-else class="text-gray-400 text-sm">No 7-day comparison data available.</p>
     </div>
+
+
 
     <!-- Loading Spinner -->
     <div v-if="loading" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
@@ -170,6 +169,8 @@ async function fetchAndRender() {
     })
 
     stats.value = store.summary
+    await fetch7DayData()
+
     prepareChart()
   } finally {
     loading.value = false
@@ -177,7 +178,7 @@ async function fetchAndRender() {
 }
 
 function prepareChart() {
-  const data = store.visualizedData 
+  const data = store.visualizedData
   const timestamps = data.map((d) => new Date(d.timestamp))
 
   chartSeries.value = []
@@ -236,6 +237,30 @@ function prepareChart() {
   }
 }
 
+const fetch7DayData = async () => {
+  await store.fetch7DayComparison()
+  dailySeries.value = store.sevenDayComparison
+
+  dailyOptions.value = {
+    chart: { id: 'daily-comparison' },
+    xaxis: {
+      title: { text: 'Hour' },
+      type: 'numeric',
+      tickAmount: 12,
+      min: 0,
+      max: 23
+    },
+    yaxis: {
+      title: { text: 'Temperature (°C)' }
+    },
+    stroke: { curve: 'smooth' },
+    tooltip: {
+      x: { formatter: (val: number) => `Hour ${val}` }
+    }
+  }
+}
+
+
 function groupByDay(data: VisualizedSensorData[]) {
   return data.reduce((acc, item) => {
     const dateKey = new Date(item.timestamp).toISOString().split('T')[0]
@@ -293,6 +318,7 @@ onMounted(async () => {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

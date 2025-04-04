@@ -9,7 +9,7 @@ const filters = ref({
   end_time: '',
   page: 1,
   perPage: 30,
-  sort_order: 'desc'
+  sort_order: 'desc',
 })
 
 const totalPages = computed(() => Math.ceil(store.total / filters.value.perPage))
@@ -19,18 +19,17 @@ const loading = computed(() => store.loading)
 const error = computed(() => store.error)
 
 const fetchData = async () => {
-  const result = await store.fetchAllVisualizedData({
+  await store.fetchAllVisualizedData({
     start_time: filters.value.start_time,
     end_time: filters.value.end_time,
     skip: skip.value,
     limit: filters.value.perPage,
-    order: filters.value.sort_order
+    order: filters.value.sort_order,
   })
-  store.total = result.total || 0
 }
 
 const nextPage = () => {
-  if (filters.value.page < store.total / filters.value.perPage) {
+  if (filters.value.page < totalPages.value) {
     filters.value.page++
     fetchData()
   }
@@ -46,11 +45,9 @@ const prevPage = () => {
 onMounted(() => {
   fetchData()
 })
-
 </script>
+
 <template>
-
-
   <div class="p-6 bg-gray-50 min-h-screen">
     <h1 class="text-2xl font-bold mb-6 text-gray-800">📊 Visualized Sensor Data</h1>
 
@@ -126,22 +123,21 @@ onMounted(() => {
         class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50">
         Next
       </button>
-
-
     </div>
-
 
     <div v-if="loading" class="loader-overlay">
       <div class="loader"></div>
     </div>
   </div>
 </template>
+
 <style scoped>
 .loader-overlay {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background-color: rgba(31, 41, 55, 0.5); /* bg-gray-800 with opacity */
+  background-color: rgba(31, 41, 55, 0.5);
+  /* bg-gray-800 with opacity */
   display: flex;
   align-items: center;
   justify-content: center;

@@ -52,11 +52,17 @@ function getVisualizedSummary(params: {
   return http.get('/sensor/visualized', { params: cleanedParams }).then(res => res.data)
 }
 
+function get7DayComparison() {
+  return http.get('/sensor/7day-comparison')
+}
+
+
 // export
 export default {
   uploadSensorCSV,
   getVisualizedSensorData,
   getVisualizedSummary,
   getAllVisualizedData,
+  get7DayComparison,
   
 }

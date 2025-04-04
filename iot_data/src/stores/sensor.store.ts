@@ -19,9 +19,7 @@ export const useSensorStore = defineStore('sensor', () => {
     anomaly_only: false,
   })
 
-  const chartData = ref<any[]>([])
-  const anomalies = ref<any[]>([])
-  const anomalyPoints = ref<any[]>([])
+  const sevenDayComparison = ref<any[]>([])
 
   async function fetchVisualizedData(params?: {
     start_time?: string
@@ -35,15 +33,9 @@ export const useSensorStore = defineStore('sensor', () => {
     loading.value = true
     error.value = null
     try {
-      clearChartData()
-  
       const mergedParams = { ...filterParams.value, ...params }
       const res = await sensorService.getVisualizedSensorData(mergedParams)
       visualizedData.value = res.data
-      console.log('visualizedData', visualizedData.value.length);
-      console.log('res', res.data);
-      
-      
     } catch (err) {
       error.value = (err as Error).message || 'Failed to fetch sensor data'
     } finally {
@@ -55,10 +47,7 @@ export const useSensorStore = defineStore('sensor', () => {
     loading.value = true
     error.value = null
     try {
-
       await sensorService.uploadSensorCSV(file)
-  clearChartData()
-
       await fetchVisualizedData()
     } catch (err) {
       error.value = (err as Error).message || 'Failed to upload CSV'
@@ -77,57 +66,57 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  function setFilters(params: Partial<typeof filterParams.value>) {
-    filterParams.value = { ...filterParams.value, ...params }
+  async function fetchSummary(params?: {
+    start_time?: string
+    end_time?: string
+  }) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await sensorService.getVisualizedSummary(params || {})
+      summary.value = res.data
+    } catch (err) {
+      error.value = (err as Error).message || 'Failed to fetch summary data'
+    } finally {
+      loading.value = false
+    }
   }
-async function fetchSummary(params?: {
-  start_time?: string
-  end_time?: string
-}) {
-  clearChartData()
-  loading.value = true
-  error.value = null
-  try {
-    const res = await sensorService.getVisualizedSummary(params || {})
-    summary.value = res.data
-    console.log('summary', res.data);
-    
-  } catch (err) {
-    error.value = (err as Error).message || 'Failed to fetch summary data'
-  } finally {
-    loading.value = false
-  }
-}
 
-// clear chart data
-function clearChartData() {
-  chartData.value = []
-  anomalies.value = []
-  anomalyPoints.value = []
-}
-
-async function fetchAllVisualizedData(params: {
-  start_time?: string
-  end_time?: string
-  skip?: number
-  limit?: number
-  order?: string
-}) {
-  loading.value = true
-  error.value = null
-  try {
-    const res = await sensorService.getAllVisualizedData(params)
-    visualizedData.value = res.data
-    total.value = res.total
-    return { total: res.total }
-  } catch (err) {
-    error.value = (err as Error).message || 'Failed to fetch all visualized data'
-    total.value = 0
-    return { total: 0 }
-  } finally {
-    loading.value = false
+  async function fetchAllVisualizedData(params: {
+    start_time?: string
+    end_time?: string
+    skip?: number
+    limit?: number
+    order?: string
+  }) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await sensorService.getAllVisualizedData(params)
+      visualizedData.value = res.data
+      total.value = res.total
+      return { total: res.total }
+    } catch (err) {
+      error.value = (err as Error).message || 'Failed to fetch all visualized data'
+      total.value = 0
+      return { total: 0 }
+    } finally {
+      loading.value = false
+    }
   }
-}
+
+  async function fetch7DayComparison() {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await sensorService.get7DayComparison()
+      sevenDayComparison.value = res.data
+    } catch (err) {
+      error.value = (err as Error).message || 'Failed to fetch 7-day comparison chart'
+    } finally {
+      loading.value = false
+    }
+  }
 
   return {
     visualizedData,
@@ -137,13 +126,11 @@ async function fetchAllVisualizedData(params: {
     fetchVisualizedData,
     uploadCSV,
     resetFilters,
-    setFilters,
     fetchSummary,
     summary,
-    chartData,
-    anomalies,
-    anomalyPoints,
     fetchAllVisualizedData,
-    total
+    total,
+    fetch7DayComparison,
+    sevenDayComparison,
   }
 })
