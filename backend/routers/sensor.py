@@ -98,3 +98,42 @@ def get_visualized_data(
             result.append(record)
 
     return result
+@router.get("/visualized/summary")
+def get_summary_statistics(
+    db: Session = Depends(get_db),
+    start_time: Optional[datetime] = Query(None, description="Start timestamp"),
+    end_time: Optional[datetime] = Query(None, description="End timestamp"),
+):
+    # Base query
+    query = db.query(VisualizedSensorData)
+    if start_time:
+        query = query.filter(VisualizedSensorData.timestamp >= start_time)
+    if end_time:
+        query = query.filter(VisualizedSensorData.timestamp <= end_time)
+
+    data = query.all()
+    if not data:
+        return {
+            "temperature": {"min": None, "max": None, "mean": None},
+            "humidity": {"min": None, "max": None, "mean": None},
+            "air_quality": {"min": None, "max": None, "mean": None},
+        }
+
+    df = pd.DataFrame([{
+        "temperature": d.temperature,
+        "humidity": d.humidity,
+        "air_quality": d.air_quality
+    } for d in data])
+
+    def summary(series: pd.Series):
+        return {
+            "min": round(series.min(), 2),
+            "max": round(series.max(), 2),
+            "mean": round(series.mean(), 2)
+        }
+
+    return {
+        "temperature": summary(df["temperature"]),
+        "humidity": summary(df["humidity"]),
+        "air_quality": summary(df["air_quality"])
+    }

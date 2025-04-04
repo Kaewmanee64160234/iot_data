@@ -1,41 +1,76 @@
 <template>
-  <div class="p-6 space-y-6">
-    <h1 class="text-2xl font-bold">Sensor Dashboard</h1>
+  <div class="p-6 space-y-8 bg-gray-50 min-h-screen">
+
+    <h1 class="text-3xl font-bold text-gray-800">Sensor Dashboard</h1>
 
     <!-- Upload Section -->
-    <div class="border p-4 rounded-lg shadow">
-      <h2 class="text-lg font-semibold mb-2">Upload CSV</h2>
-      <input type="file" @change="handleFileUpload" accept=".csv" class="mb-2" />
-      <button @click="uploadFile" :disabled="!file" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-        Upload
-      </button>
+    <div class="border p-6 rounded-lg shadow bg-white">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload CSV</h2>
+      <div class="flex items-center gap-4">
+        <input type="file" @change="handleFileUpload" accept=".csv" class="border px-4 py-2 rounded w-full" />
+        <button @click="uploadFile" :disabled="!file" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
+          Upload
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="border p-6 rounded-lg shadow bg-white grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+        <input type="date" v-model="filters.start" class="w-full border px-4 py-2 rounded" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+        <input type="date" v-model="filters.end" class="w-full border px-4 py-2 rounded" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">View Mode</label>
+        <select v-model="filters.mode" class="w-full border px-4 py-2 rounded">
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+        </select>
+      </div>
+      <div class="col-span-3">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Metrics</label>
+        <div class="flex gap-4">
+          <label class="flex items-center gap-2"><input type="checkbox" value="temperature" v-model="filters.metrics" /> Temperature</label>
+          <label class="flex items-center gap-2"><input type="checkbox" value="humidity" v-model="filters.metrics" /> Humidity</label>
+          <label class="flex items-center gap-2"><input type="checkbox" value="air_quality" v-model="filters.metrics" /> Air Quality</label>
+        </div>
+      </div>
+      <div class="col-span-3 text-right">
+        <button @click="applyFilters" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
+          Apply Filters
+        </button>
+      </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white shadow rounded-lg p-4 text-center">
-        <h3 class="font-semibold">Temperature (°C)</h3>
-        <p>Min: {{ stats.temperature?.min }}</p>
-        <p>Max: {{ stats.temperature?.max }}</p>
-        <p>Avg: {{ stats.temperature?.mean }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white shadow rounded-lg p-6 text-center">
+        <h3 class="font-semibold text-lg text-gray-700">Temperature (°C)</h3>
+        <p class="text-gray-600">Min: {{ formatStat(stats.temperature?.min) }}</p>
+        <p class="text-gray-600">Max: {{ formatStat(stats.temperature?.max) }}</p>
+        <p class="text-gray-600">Avg: {{ formatStat(stats.temperature?.mean) }}</p>
       </div>
-      <div class="bg-white shadow rounded-lg p-4 text-center">
-        <h3 class="font-semibold">Humidity (%)</h3>
-        <p>Min: {{ stats.humidity?.min }}</p>
-        <p>Max: {{ stats.humidity?.max }}</p>
-        <p>Avg: {{ stats.humidity?.mean }}</p>
+      <div class="bg-white shadow rounded-lg p-6 text-center">
+        <h3 class="font-semibold text-lg text-gray-700">Humidity (%)</h3>
+        <p class="text-gray-600">Min: {{ formatStat(stats.humidity?.min) }}</p>
+        <p class="text-gray-600">Max: {{ formatStat(stats.humidity?.max) }}</p>
+        <p class="text-gray-600">Avg: {{ formatStat(stats.humidity?.mean) }}</p>
       </div>
-      <div class="bg-white shadow rounded-lg p-4 text-center">
-        <h3 class="font-semibold">Air Quality</h3>
-        <p>Min: {{ stats.air_quality?.min }}</p>
-        <p>Max: {{ stats.air_quality?.max }}</p>
-        <p>Avg: {{ stats.air_quality?.mean }}</p>
+      <div class="bg-white shadow rounded-lg p-6 text-center">
+        <h3 class="font-semibold text-lg text-gray-700">Air Quality</h3>
+        <p class="text-gray-600">Min: {{ formatStat(stats.air_quality?.min) }}</p>
+        <p class="text-gray-600">Max: {{ formatStat(stats.air_quality?.max) }}</p>
+        <p class="text-gray-600">Avg: {{ formatStat(stats.air_quality?.mean) }}</p>
       </div>
     </div>
 
     <!-- Line Chart (Hourly/Daily) with anomaly points -->
-    <div class="border p-4 rounded-lg shadow">
-      <h2 class="text-lg font-semibold mb-4">Sensor Data Line Chart (with Anomalies)</h2>
+    <div class="border p-6 rounded-lg shadow bg-white">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">Sensor Data Line Chart (with Anomalies)</h2>
       <ApexChart
         v-if="chartOptions && chartSeries.length"
         type="line"
@@ -46,8 +81,8 @@
     </div>
 
     <!-- Past 7-Day Chart (Daily Comparison) -->
-    <div class="border p-4 rounded-lg shadow">
-      <h2 class="text-lg font-semibold mb-4">7-Day Comparison Chart</h2>
+    <div class="border p-6 rounded-lg shadow bg-white">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">7-Day Comparison Chart</h2>
       <ApexChart
         v-if="dailyOptions && dailySeries.length"
         type="line"
@@ -73,6 +108,13 @@ const dailyOptions = ref<any>(null)
 const dailySeries = ref<any[]>([])
 const stats = ref<any>({})
 
+const filters = ref({
+  start: '',
+  end: '',
+  mode: 'hourly',
+  metrics: ['temperature', 'humidity', 'air_quality']
+})
+
 const handleFileUpload = (e: Event) => {
   const target = e.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
@@ -83,38 +125,67 @@ const handleFileUpload = (e: Event) => {
 const uploadFile = async () => {
   if (file.value) {
     await store.uploadCSV(file.value)
-    prepareChart()
+    await fetchAndRender()
   }
 }
 
-const prepareChart = () => {
-  const data = store.visualizedData as VisualizedSensorData[]
-  const timestamps = data.map((d) => new Date(d.timestamp)) // Ensure timestamps are Date objects
+async function applyFilters() {
+  await fetchAndRender()
+}
 
-  chartSeries.value = [
-    {
+async function fetchAndRender() {
+  await store.fetchVisualizedData({
+    start_time: filters.value.start ? filters.value.start + 'T00:00:00' : undefined,
+    end_time: filters.value.end ? filters.value.end + 'T23:59:59' : undefined,
+    metrics: filters.value.metrics,
+    smooth: true,
+    anomaly_only: false
+  })
+
+  await store.fetchSummary({
+    start_time: filters.value.start ? filters.value.start + 'T00:00:00' : undefined,
+    end_time: filters.value.end ? filters.value.end + 'T23:59:59' : undefined
+  })
+
+  stats.value = store.summary
+  prepareChart()
+}
+
+function prepareChart() {
+  const data = store.visualizedData as VisualizedSensorData[]
+  const timestamps = data.map((d) => new Date(d.timestamp))
+
+  chartSeries.value = []
+
+  if (filters.value.metrics.includes('temperature')) {
+    chartSeries.value.push({
       name: 'Temperature',
       data: data.map((d) => ({ x: new Date(d.timestamp), y: d.temperature_smooth ?? d.temperature })),
       color: '#FF5733'
-    },
-    {
+    })
+  }
+  if (filters.value.metrics.includes('humidity')) {
+    chartSeries.value.push({
       name: 'Humidity',
       data: data.map((d) => ({ x: new Date(d.timestamp), y: d.humidity_smooth ?? d.humidity })),
       color: '#2980B9'
-    },
-    {
+    })
+  }
+  if (filters.value.metrics.includes('air_quality')) {
+    chartSeries.value.push({
       name: 'Air Quality',
       data: data.map((d) => ({ x: new Date(d.timestamp), y: d.air_quality_smooth ?? d.air_quality })),
       color: '#27AE60'
-    },
-    {
-      name: 'Anomalies',
-      type: 'scatter',
-      data: data.filter(d => d.temperature_anomaly || d.humidity_anomaly || d.air_quality_anomaly)
-        .map((d) => ({ x: new Date(d.timestamp), y: d.temperature })),
-      color: '#E74C3C'
-    }
-  ]
+    })
+  }
+
+  chartSeries.value.push({
+    name: 'Anomalies',
+    type: 'scatter',
+    data: data.filter(d => d.temperature_anomaly || d.humidity_anomaly || d.air_quality_anomaly)
+      .map((d) => ({ x: new Date(d.timestamp), y: d.temperature })),
+    color: '#E74C3C'
+  })
 
   chartOptions.value = {
     chart: { id: 'sensor-data', zoom: { enabled: true } },
@@ -124,16 +195,6 @@ const prepareChart = () => {
     stroke: { curve: 'smooth' }
   }
 
-  // Summary statistics (today only)
-  const today = new Date().toISOString().split('T')[0]
-  const todayData = data.filter((d) => new Date(d.timestamp).toISOString().startsWith(today)) // Convert timestamp to Date
-  stats.value = {
-    temperature: summarize(todayData.map(d => d.temperature)),
-    humidity: summarize(todayData.map(d => d.humidity)),
-    air_quality: summarize(todayData.map(d => d.air_quality))
-  }
-
-  // 7-Day Grouping
   const dailyGrouped = groupByDay(data)
   dailySeries.value = Object.entries(dailyGrouped).map(([day, values]) => ({
     name: day,
@@ -150,25 +211,24 @@ const prepareChart = () => {
   }
 }
 
-function summarize(values: number[]) {
-  const mean = +(values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  return { mean, min, max }
-}
-
 function groupByDay(data: VisualizedSensorData[]) {
   return data.reduce((acc, item) => {
-    const dateKey = new Date(item.timestamp).toISOString().split('T')[0] // Convert timestamp to Date
+    const dateKey = new Date(item.timestamp).toISOString().split('T')[0]
     if (!acc[dateKey]) acc[dateKey] = []
     acc[dateKey].push(item)
     return acc
   }, {} as Record<string, VisualizedSensorData[]>)
 }
 
+function formatStat(value: number | undefined | null): string {
+  if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
+    return 'N/A'
+  }
+  return value.toFixed(2)
+}
+
 onMounted(async () => {
-  await store.fetchVisualizedData()
-  prepareChart()
+  await fetchAndRender()
 })
 </script>
 

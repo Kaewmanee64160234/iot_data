@@ -6,7 +6,7 @@ import { RouterLink, RouterView } from 'vue-router'
   <RouterView />
 </template>
 <style>
-@import "tailwindcss";
+
 </style>
 
 
