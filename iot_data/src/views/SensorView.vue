@@ -304,7 +304,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Add styles for the loading spinner */
 .loader {
   border: 4px solid #f3f3f3;
   border-top: 4px solid #3498db;

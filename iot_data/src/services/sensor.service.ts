@@ -1,6 +1,7 @@
 import type { VisualizedSensorData } from '@/types/visualized_data.type'
 import http from './axios'
 import type { VisualizedSummary } from '@/types/summary.sensor.types'
+import type { AggregatedInsight } from '@/types/aggregated_insight.type'
 
 function uploadSensorCSV(file: File): Promise<{ message: string }> {
   const formData = new FormData()
@@ -56,7 +57,19 @@ function get7DayComparison() {
   return http.get('/sensor/7day-comparison')
 }
 
+function getAggregatedInsight(params: {
+  window: string
+  start_time?: string
+  end_time?: string
+}): Promise<AggregatedInsight[]> {
+  const cleanedParams = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+  )
+  console.log('cleanedParams', cleanedParams);
+  
 
+  return http.get('/sensor/aggregated-insight', { params: cleanedParams })
+}
 // export
 export default {
   uploadSensorCSV,
@@ -64,5 +77,6 @@ export default {
   getVisualizedSummary,
   getAllVisualizedData,
   get7DayComparison,
+  getAggregatedInsight,
   
 }

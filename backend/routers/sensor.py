@@ -222,56 +222,42 @@ def get_summary_statistics(
         "air_quality": summary(df["air_quality"])
     }
 
-
-def get_chart_data(
+@router.get("/aggregated-insight")
+def get_aggregated_insight(
     db: Session = Depends(get_db),
+    window: str = Query("1h", description="Aggregation window (e.g., 10min, 1h, 1d)"),
     start_time: Optional[datetime] = Query(None),
     end_time: Optional[datetime] = Query(None),
-    resolution: str = Query("hourly", description="hourly or daily")
 ):
     query = db.query(VisualizedSensorData)
+
     if start_time:
         query = query.filter(VisualizedSensorData.timestamp >= start_time)
     if end_time:
         query = query.filter(VisualizedSensorData.timestamp <= end_time)
 
-    data = query.order_by(VisualizedSensorData.timestamp.asc()).all()
+    data = query.all()
     if not data:
-        return {"graph": [], "anomalies": []}
+        return {"message": "No data found"}
 
     df = pd.DataFrame([{
         "timestamp": d.timestamp,
         "temperature": d.temperature,
         "humidity": d.humidity,
         "air_quality": d.air_quality,
-        "anomaly": (
-            d.temperature_anomaly or
-            d.humidity_anomaly or
-            d.air_quality_anomaly
-        )
     } for d in data])
 
     df["timestamp"] = pd.to_datetime(df["timestamp"])
-    df["anomaly"] = df["anomaly"].astype(bool)
+    df.set_index("timestamp", inplace=True)
 
-    df = df.set_index("timestamp")
+    # Resample based on user input
+    try:
+        grouped = df.resample(window).agg(['min', 'max', 'mean', 'median'])
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid window format: {window}")
 
-    if resolution == "daily":
-        resampled = df.resample("D").mean()
-    else:
-        resampled = df.resample("H").mean()
+    grouped.columns = ['_'.join(col).strip() for col in grouped.columns.values]
+    grouped = grouped.reset_index()
 
-    resampled.replace([np.inf, -np.inf], np.nan, inplace=True)
-    resampled = resampled.fillna(value=np.nan)
-    resampled = resampled.where(pd.notnull(resampled), None)
-
-    resampled = resampled.reset_index()
-
-    anomaly_points = resampled[resampled["anomaly"] == True][["timestamp", "temperature"]]
-    anomaly_points = anomaly_points.replace([np.inf, -np.inf], np.nan)
-    anomaly_points = anomaly_points.where(pd.notnull(anomaly_points), None)
-
-    return {
-        "graph": resampled.to_dict(orient="records"),
-        "anomalies": anomaly_points.to_dict(orient="records")
-    }
+    # Convert result to dictionary for JSON response
+    return grouped.to_dict(orient="records")

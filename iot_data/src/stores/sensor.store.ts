@@ -4,9 +4,11 @@ import { ref } from 'vue'
 import sensorService from '@/services/sensor.service'
 import type { VisualizedSensorData } from '@/types/visualized_data.type'
 import type { VisualizedSummary } from '@/types/summary.sensor.types'
+import type { AggregatedInsight } from '@/types/aggregated_insight.type'
 
 export const useSensorStore = defineStore('sensor', () => {
   const visualizedData = ref<VisualizedSensorData[]>([])
+  const aggregatedInsights = ref<AggregatedInsight[]>([])
   const loading = ref(false)
   const total = ref(0)
   const error = ref<string | null>(null)
@@ -118,6 +120,26 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
+  async function fetchAggregatedInsight(params: {
+    window: string
+    start_time?: string
+    end_time?: string
+  }) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await sensorService.getAggregatedInsight(params)
+      aggregatedInsights.value = res
+      console.log('aggregatedInsights', aggregatedInsights.value);
+      
+    } catch (err) {
+      error.value = (err as Error).message || 'Failed to fetch aggregated insights'
+    } finally {
+      loading.value = false
+    }
+  }
+
+ 
   return {
     visualizedData,
     loading,
@@ -132,5 +154,7 @@ export const useSensorStore = defineStore('sensor', () => {
     total,
     fetch7DayComparison,
     sevenDayComparison,
+    fetchAggregatedInsight,
+    aggregatedInsights,
   }
 })
