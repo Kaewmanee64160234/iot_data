@@ -3,7 +3,7 @@
 
     <h1 class="text-3xl font-bold text-gray-800">Sensor Dashboard</h1>
 
-    <!-- Upload Section -->
+    <!-- Upload  -->
     <div class="border p-6 rounded-lg shadow bg-white">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload CSV</h2>
       <div class="flex items-center gap-4">
@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <!-- Filter Section -->
+    <!-- Filter  -->
     <div class="border p-6 rounded-lg shadow bg-white grid grid-cols-1 md:grid-cols-3 gap-6">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
@@ -177,7 +177,7 @@ async function fetchAndRender() {
 }
 
 function prepareChart() {
-  const data = store.visualizedData as VisualizedSensorData[]
+  const data = store.visualizedData 
   const timestamps = data.map((d) => new Date(d.timestamp))
 
   chartSeries.value = []

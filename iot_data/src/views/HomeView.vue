@@ -55,17 +55,17 @@ const lastUpdated = ref('')
 const backgroundImage = ref('/default.jpg')
 const isImageLoaded = ref(false)
 const backgroundRef = ref<HTMLElement | null>(null)
+const currentTime = ref(new Date())
 
 const formattedDate = computed(() => {
-  const now = new Date()
-  return now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  return currentTime.value.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 })
 
 const formattedTime = computed(() => {
-  const now = new Date()
-  return now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+  return currentTime.value.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 })
 
+// เปลี่ยนแปลงสี ตามคค่า AQI
 function aqiColor(aqi: number | string) {
   const val = Number(aqi)
   if (isNaN(val)) return { text: 'text-gray-500', label: 'N/A' }
@@ -111,6 +111,10 @@ onMounted(async () => {
     { threshold: 0.1 }
   )
   if (backgroundRef.value) observer.observe(backgroundRef.value)
+
+  setInterval(() => {
+    currentTime.value = new Date()
+  }, 1000)
 })
 </script>
 

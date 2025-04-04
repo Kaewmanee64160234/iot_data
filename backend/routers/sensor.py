@@ -1,6 +1,6 @@
 from io import StringIO
 from typing import List, Optional
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database.database import SessionLocal
@@ -118,6 +118,32 @@ def get_visualized_data(
             result.append(record)
 
     return result
+
+# create a all data that clean save in db by make paginate
+@router.get("/visualized")
+def get_visualized_data_all(
+    db: Session = Depends(get_db),
+    start_time: Optional[datetime] = Query(None, description="Start timestamp"),
+    end_time: Optional[datetime] = Query(None, description="End timestamp"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Max number of records to return"),
+    order: str = Query("asc", description="Order by timestamp: 'asc' or 'desc'")
+):
+    query = db.query(VisualizedSensorData)
+
+    if start_time:
+        query = query.filter(VisualizedSensorData.timestamp >= start_time)
+    if end_time:
+        query = query.filter(VisualizedSensorData.timestamp <= end_time)
+
+    if order == "desc":
+        query = query.order_by(VisualizedSensorData.timestamp.desc())
+    else:
+        query = query.order_by(VisualizedSensorData.timestamp.asc())
+
+    data = query.offset(skip).limit(limit).all()
+    return data
+
 @router.get("/aggregated")
 def get_summary_statistics(
     db: Session = Depends(get_db),

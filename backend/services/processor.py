@@ -41,16 +41,16 @@ def validate_and_ingest(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def clean_weather_data(df: pd.DataFrame, resample_window: str = "1H") -> pd.DataFrame:
-    """
-    Fill missing data, interpolate, resample and smooth time-series.
-    """
+
+    # Fill missing value
+
     df.set_index("timestamp", inplace=True)
 
     # Resample and fill missing with interpolate
     df = df.resample(resample_window).mean()
     df = df.interpolate(method="time")
 
-    # Rolling average (smoothing)
+    # Rolling average 
     df["temperature_smooth"] = df["temperature"].rolling(3, min_periods=1).mean()
     df["humidity_smooth"] = df["humidity"].rolling(3, min_periods=1).mean()
     df["air_quality_smooth"] = df["air_quality"].rolling(3, min_periods=1).mean()
@@ -60,9 +60,7 @@ def clean_weather_data(df: pd.DataFrame, resample_window: str = "1H") -> pd.Data
 
 
 def detect_anomalies_iqr(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Detect anomalies using IQR method. test
-    """
+    #  IQR method
     for col in ["temperature", "humidity", "air_quality"]:
         q1 = df[col].quantile(0.25)
         q3 = df[col].quantile(0.75)

@@ -19,7 +19,6 @@ function getVisualizedSensorData(params: {
   smooth?: boolean
   anomaly_only?: boolean
 }): Promise<{ data: VisualizedSensorData[] }> {
-  // Remove empty strings before sending request
   const cleanedParams = Object.fromEntries(
     Object.entries(params).filter(
       ([_, v]) => v !== undefined && v !== null && v !== ''
@@ -28,7 +27,6 @@ function getVisualizedSensorData(params: {
   return http.get('/sensor/processed', { params: cleanedParams })
 }
 
-// create a new function to get visualized sensor data with summary
 function getVisualizedSummary(params: {
   start_time?: string
   end_time?: string
@@ -41,7 +39,20 @@ function getVisualizedSummary(params: {
   return http.get('/sensor/aggregated', { params: cleanedParams })
 }
 
-
+function getAllVisualizedData(params: {
+  start_time?: string
+  end_time?: string
+  skip?: number
+  limit?: number
+  order?: string
+}): Promise<{ data: VisualizedSensorData[] }> {
+  const cleanedParams = Object.fromEntries(
+    Object.entries(params).filter(
+      ([_, v]) => v !== undefined && v !== null && v !== ''
+    )
+  )
+  return http.get('/sensor/visualized', { params: cleanedParams })
+}
 
 
 // export
@@ -49,4 +60,6 @@ export default {
   uploadSensorCSV,
   getVisualizedSensorData,
   getVisualizedSummary,
+  getAllVisualizedData,
+  
 }

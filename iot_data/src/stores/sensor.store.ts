@@ -34,9 +34,15 @@ export const useSensorStore = defineStore('sensor', () => {
     loading.value = true
     error.value = null
     try {
+      clearChartData()
+  
       const mergedParams = { ...filterParams.value, ...params }
       const res = await sensorService.getVisualizedSensorData(mergedParams)
       visualizedData.value = res.data
+      console.log('visualizedData', visualizedData.value.length);
+      console.log('res', res.data);
+      
+      
     } catch (err) {
       error.value = (err as Error).message || 'Failed to fetch sensor data'
     } finally {
@@ -48,7 +54,10 @@ export const useSensorStore = defineStore('sensor', () => {
     loading.value = true
     error.value = null
     try {
+
       await sensorService.uploadSensorCSV(file)
+  clearChartData()
+
       await fetchVisualizedData()
     } catch (err) {
       error.value = (err as Error).message || 'Failed to upload CSV'
@@ -74,6 +83,7 @@ async function fetchSummary(params?: {
   start_time?: string
   end_time?: string
 }) {
+  clearChartData()
   loading.value = true
   error.value = null
   try {
@@ -88,9 +98,32 @@ async function fetchSummary(params?: {
   }
 }
 
+// clear chart data
+function clearChartData() {
+  chartData.value = []
+  anomalies.value = []
+  anomalyPoints.value = []
+}
 
-
-
+async function fetchAllVisualizedData(params?: {
+  start_time?: string
+  end_time?: string
+  skip?: number
+  limit?: number
+  order?: string // 'asc' | 'desc'
+}) {
+  loading.value = true
+  error.value = null
+  try {
+    const res = await sensorService.getAllVisualizedData(params || {})
+    visualizedData.value = res.data
+    console.log('Fetched all visualized data:', visualizedData.value.length)
+  } catch (err) {
+    error.value = (err as Error).message || 'Failed to fetch all visualized data'
+  } finally {
+    loading.value = false
+  }
+}
 
   return {
     visualizedData,
@@ -106,5 +139,6 @@ async function fetchSummary(params?: {
     chartData,
     anomalies,
     anomalyPoints,
+    fetchAllVisualizedData,
   }
 })
