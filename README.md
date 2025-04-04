@@ -110,7 +110,7 @@ docker compose up --build
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Windows ใช้ venv\Scripts\activate
+venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -139,5 +139,3 @@ docker pull kaewmanee/sensor-backend:latest
 docker run -d -p 5173:5173 kaewmanee/sensor-frontend
 docker run -d -p 8000:8000 kaewmanee/sensor-backend
 ```
-
- **หมายเหตุ**: ถ้าใช้แยก ต้องตั้งค่า `DB_HOST`, `DB_NAME` เองให้เชื่อมกับฐานข้อมูล MySQL
