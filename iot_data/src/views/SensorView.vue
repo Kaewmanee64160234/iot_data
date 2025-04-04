@@ -83,12 +83,10 @@
     </div>
 
     <div class="border p-6 rounded-lg shadow bg-white">
-      <h2 class="text-xl font-semibold text-gray-700 mb-4">📈 7-Day Temperature Comparison</h2>
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">7-Day Avg per Hour (From API)</h2>
       <ApexChart v-if="dailyOptions && dailySeries.length" type="line" height="350" :options="dailyOptions"
         :series="dailySeries" />
-      <p v-else class="text-gray-400 text-sm">No 7-day comparison data available.</p>
     </div>
-
 
 
     <!-- Loading Spinner -->
@@ -236,27 +234,18 @@ function prepareChart() {
     stroke: { curve: 'smooth' }
   }
 }
-
 const fetch7DayData = async () => {
   await store.fetch7DayComparison()
   dailySeries.value = store.sevenDayComparison
+  console.log("dailySeries.value", dailySeries.value);
 
   dailyOptions.value = {
     chart: { id: 'daily-comparison' },
     xaxis: {
       title: { text: 'Hour' },
-      type: 'numeric',
-      tickAmount: 12,
-      min: 0,
-      max: 23
+      categories: Array.from({ length: 24 }, (_, i) => i.toString())
     },
-    yaxis: {
-      title: { text: 'Temperature (°C)' }
-    },
-    stroke: { curve: 'smooth' },
-    tooltip: {
-      x: { formatter: (val: number) => `Hour ${val}` }
-    }
+    stroke: { curve: 'smooth' }
   }
 }
 
@@ -304,6 +293,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Add styles for the loading spinner */
 .loader {
   border: 4px solid #f3f3f3;
   border-top: 4px solid #3498db;

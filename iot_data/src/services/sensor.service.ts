@@ -57,7 +57,7 @@ function get7DayComparison() {
   return http.get('/sensor/7day-comparison')
 }
 
-function getAggregatedInsight(params: {
+async function getAggregatedInsight(params: {
   window: string
   start_time?: string
   end_time?: string
@@ -68,7 +68,9 @@ function getAggregatedInsight(params: {
   console.log('cleanedParams', cleanedParams);
   
 
-  return http.get('/sensor/aggregated-insight', { params: cleanedParams })
+  const res = await  http.get('/sensor/aggregated-insight', { params: cleanedParams })
+  console.log('res', res);
+  return res.data
 }
 // export
 export default {
