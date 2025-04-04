@@ -1,4 +1,4 @@
-export interface VisualizedSensorDataTS {
+export interface VisualizedSensorData {
   id: number
   timestamp: Date
   temperature: number

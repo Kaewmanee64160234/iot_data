@@ -1,4 +1,4 @@
-# fontend_iot_data
+# iot_data
 
 This template should help get you started developing with Vue 3 in Vite.
 
@@ -32,8 +32,8 @@ npm run dev
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Run Unit Tests with [Vitest](https://vitest.dev/)
 
 ```sh
-npm run lint
+npm run test:unit
 ```

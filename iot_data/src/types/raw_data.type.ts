@@ -1,4 +1,4 @@
-export interface RawSensorDataTS {
+export interface RawSensorData {
   id: number
   timestamp: Date
   temperature: number

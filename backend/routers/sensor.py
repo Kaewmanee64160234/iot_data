@@ -53,10 +53,11 @@ def get_visualized_data(
     db: Session = Depends(get_db),
     start_time: Optional[datetime] = Query(None, description="Start timestamp"),
     end_time: Optional[datetime] = Query(None, description="End timestamp"),
-    metrics: Optional[List[str]] = Query(None, description="Metrics to include (temperature, humidity, air_quality)"),
+    metrics: List[str] = Query(default=[], description="Metrics to include (temperature, humidity, air_quality)"),
     smooth: bool = Query(True, description="Include smoothed values"),
     anomaly_only: bool = Query(False, description="Only include anomaly data")
 ):
+
     # Base query
     query = db.query(VisualizedSensorData)
 
