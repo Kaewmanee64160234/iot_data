@@ -22,7 +22,6 @@ export const useSensorStore = defineStore('sensor', () => {
   const anomalies = ref<any[]>([])
   const anomalyPoints = ref<any[]>([])
 
-  // 📥 Load visualized sensor data with filter
   async function fetchVisualizedData(params?: {
     start_time?: string
     end_time?: string
@@ -46,7 +45,6 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  // 📤 Upload sensor CSV
   async function uploadCSV(file: File) {
     loading.value = true
     error.value = null
@@ -60,7 +58,6 @@ export const useSensorStore = defineStore('sensor', () => {
     }
   }
 
-  // 🧹 Reset filters to default
   function resetFilters() {
     filterParams.value = {
       start_time: '',
@@ -74,7 +71,6 @@ export const useSensorStore = defineStore('sensor', () => {
   function setFilters(params: Partial<typeof filterParams.value>) {
     filterParams.value = { ...filterParams.value, ...params }
   }
-// 📊 Load summary data
 async function fetchSummary(params?: {
   start_time?: string
   end_time?: string
@@ -93,24 +89,7 @@ async function fetchSummary(params?: {
   }
 }
 
-// getChartData
-async function getChartData(params?: {
-  start_time?: string
-  end_time?: string
-  resolution?: 'hourly' | 'daily'
-}) {
-  loading.value = true
-  error.value = null
-  try {
-    const res = await sensorService.getChartData(params || {})
-    console.log('chart data', res.data);
-    
-  } catch (err) {
-    error.value = (err as Error).message || 'Failed to fetch chart data'
-  } finally {
-    loading.value = false
-  }
-}
+
 
 
 
@@ -125,7 +104,6 @@ async function getChartData(params?: {
     setFilters,
     fetchSummary,
     summary,
-    getChartData,
     chartData,
     anomalies,
     anomalyPoints,

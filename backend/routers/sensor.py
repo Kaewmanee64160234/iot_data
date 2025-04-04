@@ -21,7 +21,7 @@ def get_db():
 
 
 
-@router.post("/upload")
+@router.post("/data")
 async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = await file.read()
     df = pd.read_csv(StringIO(content.decode()))
@@ -62,7 +62,7 @@ class SensorOutput(BaseModel):
     class Config:
         orm_mode = True
 
-@router.get("/visualized", response_model=List[SensorOutput])
+@router.get("/processed", response_model=List[SensorOutput])
 def get_visualized_data(
     db: Session = Depends(get_db),
     start_time: Optional[datetime] = Query(None, description="Start timestamp"),
@@ -118,7 +118,7 @@ def get_visualized_data(
             result.append(record)
 
     return result
-@router.get("/visualized/summary")
+@router.get("/aggregated")
 def get_summary_statistics(
     db: Session = Depends(get_db),
     start_time: Optional[datetime] = Query(None, description="Start timestamp"),

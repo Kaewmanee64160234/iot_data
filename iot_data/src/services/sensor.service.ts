@@ -5,7 +5,7 @@ import type { VisualizedSummary } from '@/types/summary.sensor.types'
 function uploadSensorCSV(file: File): Promise<{ message: string }> {
   const formData = new FormData()
   formData.append('file', file)
-  return http.post('/sensor/upload', formData, {
+  return http.post('/sensor/data', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -25,7 +25,7 @@ function getVisualizedSensorData(params: {
       ([_, v]) => v !== undefined && v !== null && v !== ''
     )
   )
-  return http.get('/sensor/visualized', { params: cleanedParams })
+  return http.get('/sensor/processed', { params: cleanedParams })
 }
 
 // create a new function to get visualized sensor data with summary
@@ -38,35 +38,15 @@ function getVisualizedSummary(params: {
       ([_, v]) => v !== undefined && v !== null && v !== ''
     )
   )
-  return http.get('/sensor/visualized/summary', { params: cleanedParams })
+  return http.get('/sensor/aggregated', { params: cleanedParams })
 }
 
-function getChartData(params: {
-  start_time?: string
-  end_time?: string
-  resolution?: 'hourly' | 'daily'
-}) {
-  return http.get('/sensor/visualized/chart-data', { params })
-}
 
-function getChartDataWithAnomalies(params: {
-  start_time?: string
-  end_time?: string
-  resolution?: 'hourly' | 'daily'
-}): Promise<{ graph: any[]; anomalies: any[] }> {
-  const cleanedParams = Object.fromEntries(
-    Object.entries(params).filter(
-      ([_, v]) => v !== undefined && v !== null && v !== ''
-    )
-  )
-  return http.get('/sensor/visualized/chart-data', { params: cleanedParams })
-}
+
 
 // export
 export default {
   uploadSensorCSV,
   getVisualizedSensorData,
   getVisualizedSummary,
-  getChartData,
-  getChartDataWithAnomalies,
 }
