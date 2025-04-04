@@ -98,11 +98,6 @@
 docker compose up --build
 ```
 
-หรือหากมี `docker-compose.yml` อยู่แล้ว ให้รันเพียง:
-```bash
-docker compose up
-```
-
  **เปิดใช้งาน**  
 - Frontend: [http://localhost:5173](http://localhost:5173)  
 - Backend API: [http://localhost:8000/docs](http://localhost:8000/docs)
